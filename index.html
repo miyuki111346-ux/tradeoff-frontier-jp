@@ -468,28 +468,38 @@
     }
 
     function renderNetlifySites(sites) {
-      if (sites.length === 0) {
-        artifactGrid.innerHTML = `<div class="empty-state">プロジェクトなし</div>`;
-        return;
-      }
+  if (sites.length === 0) {
+    artifactGrid.innerHTML = `<div class="empty-state">プロジェクトなし</div>`;
+    return;
+  }
 
-      artifactGrid.innerHTML = sites.map((site, index) => {
-        const emoji = emojiPatterns[index % emojiPatterns.length];
-        const url = site.url || site.ssl_url || `https://${site.name}.netlify.app`;
-        return `
-          <div class="artifact-card">
-            <div class="artifact-header">${emoji}</div>
-            <div class="artifact-content">
-              <div class="artifact-name">${site.name}</div>
-              <div class="artifact-url">${url}</div>
-              <div class="artifact-actions">
-                <a href="${url}" target="_blank">表示</a>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
+  // サイト名をタスクとして自動追加
+  const existingTaskNames = tasks.map(t => t.title);
+  sites.forEach(site => {
+    if (!existingTaskNames.includes(site.name)) {
+      tasks.push({ id: Date.now() + Math.random(), title: site.name });
     }
+  });
+  renderTasks();
+  updateStats();
+
+  artifactGrid.innerHTML = sites.map((site, index) => {
+    const emoji = emojiPatterns[index % emojiPatterns.length];
+    const url = site.url || site.ssl_url || `https://${site.name}.netlify.app`;
+    return `
+      <div class="artifact-card">
+        <div class="artifact-header">${emoji}</div>
+        <div class="artifact-content">
+          <div class="artifact-name">${site.name}</div>
+          <div class="artifact-url">${url}</div>
+          <div class="artifact-actions">
+            <a href="${url}" target="_blank">表示</a>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
     if (NETLIFY_TOKEN === 'nfp_5xi656QWKZwC2AGm77KEmXNeDcUDySHV0510') {
       fetchNetlifySites();

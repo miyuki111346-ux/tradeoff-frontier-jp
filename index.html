@@ -21,6 +21,29 @@
       --critical: #ff4444;
     }
 
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg-primary: #0f1419;
+        --bg-secondary: #1a1f2e;
+        --bg-tertiary: #2a3142;
+        --accent: #00d9ff;
+        --text-primary: #f0f4f8;
+        --text-secondary: #b0bcc4;
+      }
+    }
+
+    :root[data-theme="light"] {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-tertiary: #eef2f8;
+      --accent: #0066cc;
+      --accent-glow: rgba(0, 102, 204, 0.08);
+      --text-primary: #1a1f2e;
+      --text-secondary: #4a5568;
+      --text-muted: #8892a0;
+      --border: rgba(0, 102, 204, 0.12);
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -37,15 +60,28 @@
     }
 
     .container {
-      max-width: 1400px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 2rem;
     }
 
+    /* ===== Header ===== */
     header {
       border-bottom: 1px solid var(--border);
       padding-bottom: 2rem;
       margin-bottom: 2rem;
+      position: relative;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+      opacity: 0.5;
     }
 
     h1 {
@@ -53,6 +89,7 @@
       font-size: 2.5rem;
       font-weight: 700;
       margin-bottom: 0.5rem;
+      letter-spacing: -1px;
       background: linear-gradient(135deg, var(--accent), var(--text-primary) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -62,36 +99,41 @@
     .subtitle {
       color: var(--text-secondary);
       font-size: 0.95rem;
-      margin-bottom: 1rem;
+      text-wrap: balance;
     }
 
+    /* ===== Tabs ===== */
     .tabs {
       display: flex;
       gap: 1rem;
       margin-bottom: 2rem;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 1rem;
+      overflow-x: auto;
     }
 
     .tab-button {
-      background: none;
+      background: transparent;
       border: none;
       color: var(--text-secondary);
-      padding: 0.5rem 1rem;
+      padding: 0.75rem 1.5rem;
       cursor: pointer;
       font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
       font-weight: 600;
       border-bottom: 2px solid transparent;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .tab-button:hover {
+      color: var(--accent);
     }
 
     .tab-button.active {
       color: var(--accent);
       border-bottom-color: var(--accent);
-    }
-
-    .tab-button:hover {
-      color: var(--text-primary);
     }
 
     .tab-content {
@@ -102,11 +144,12 @@
       display: block;
     }
 
+    /* ===== Stats ===== */
     .stats {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1.5rem;
-      margin-bottom: 2rem;
+      margin-bottom: 3rem;
     }
 
     .stat-card {
@@ -114,12 +157,28 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+      opacity: 0.5;
     }
 
     .stat-label {
       color: var(--text-muted);
       font-size: 0.85rem;
+      font-weight: 500;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
       margin-bottom: 0.5rem;
     }
 
@@ -127,32 +186,17 @@
       font-family: 'Space Grotesk', sans-serif;
       font-size: 2rem;
       font-weight: 700;
+      font-variant-numeric: tabular-nums;
       color: var(--accent);
+      text-wrap: balance;
     }
 
-    .section-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.3rem;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .section-title::before {
-      content: '';
-      width: 4px;
-      height: 1.3rem;
-      background: var(--accent);
-      border-radius: 2px;
-    }
-
+    /* ===== Main Section ===== */
     .main-section {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 2rem;
-      margin-bottom: 3rem;
+      margin-bottom: 2rem;
     }
 
     @media (max-width: 768px) {
@@ -161,15 +205,53 @@
       }
     }
 
-    .form-card, .list-card {
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 1.3rem;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    /* ===== Form ===== */
+    .form-card {
       background: var(--bg-secondary);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .form-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+      opacity: 0.5;
     }
 
     .form-group {
       margin-bottom: 1.5rem;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
     }
 
     label {
@@ -177,10 +259,15 @@
       margin-bottom: 0.5rem;
       color: var(--text-secondary);
       font-size: 0.9rem;
+      font-weight: 500;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
-    input[type="text"], select, textarea {
+    input[type="text"],
+    input[type="url"],
+    select,
+    textarea {
       width: 100%;
       background: var(--bg-tertiary);
       border: 1px solid var(--border);
@@ -189,15 +276,32 @@
       border-radius: 8px;
       font-family: inherit;
       font-size: 0.95rem;
+      transition: all 0.2s ease;
     }
 
-    input[type="text"]:focus, select:focus, textarea:focus {
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    input[type="text"]:focus,
+    input[type="url"]:focus,
+    select:focus,
+    textarea:focus {
       outline: none;
       border-color: var(--accent);
+      background: var(--bg-tertiary);
       box-shadow: 0 0 0 3px var(--accent-glow);
     }
 
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
     button {
+      flex: 1;
       padding: 0.875rem 1.5rem;
       border: none;
       border-radius: 8px;
@@ -205,26 +309,61 @@
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
+      transition: all 0.2s ease;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .btn-primary {
       background: var(--accent);
       color: var(--bg-primary);
-      width: 100%;
     }
 
     .btn-primary:hover {
       box-shadow: 0 0 20px var(--accent-glow);
+      transform: translateY(-2px);
     }
 
-    .list-items {
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ===== Task List ===== */
+    .task-list-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .task-list-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+      opacity: 0.5;
+    }
+
+    .task-list {
       display: flex;
       flex-direction: column;
       gap: 1rem;
     }
 
-    .item {
+    .task-item {
       background: var(--bg-tertiary);
       border-left: 3px solid var(--accent);
       border-radius: 8px;
@@ -232,26 +371,73 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      gap: 1rem;
+      transition: all 0.2s ease;
+      animation: slideIn 0.3s ease;
     }
 
-    .item-title {
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .task-item:hover {
+      background: var(--bg-tertiary);
+      border-left-color: var(--success);
+      transform: translateX(4px);
+    }
+
+    .task-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-title {
       font-weight: 600;
       color: var(--text-primary);
       margin-bottom: 0.35rem;
+      word-break: break-word;
     }
 
-    .item-desc {
+    .task-desc {
       color: var(--text-secondary);
       font-size: 0.9rem;
-      margin-bottom: 0.5rem;
+      word-break: break-word;
     }
 
-    .item-meta {
-      color: var(--text-muted);
-      font-size: 0.8rem;
+    .task-priority {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-top: 0.5rem;
     }
 
-    .item-delete {
+    .priority-high {
+      background: rgba(255, 68, 68, 0.15);
+      color: var(--critical);
+    }
+
+    .priority-medium {
+      background: rgba(255, 165, 0, 0.15);
+      color: var(--warning);
+    }
+
+    .priority-low {
+      background: rgba(0, 255, 136, 0.15);
+      color: var(--success);
+    }
+
+    .task-delete {
       background: transparent;
       border: 1px solid rgba(255, 68, 68, 0.3);
       color: var(--critical);
@@ -259,38 +445,196 @@
       height: 40px;
       padding: 0;
       border-radius: 8px;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
     }
 
-    .status-badge {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      margin-top: 0.5rem;
-    }
-
-    .status-success {
-      background: rgba(0, 255, 136, 0.15);
-      color: var(--success);
-    }
-
-    .status-building {
-      background: rgba(255, 165, 0, 0.15);
-      color: var(--warning);
-    }
-
-    .status-failed {
+    .task-delete:hover {
       background: rgba(255, 68, 68, 0.15);
+      border-color: var(--critical);
+    }
+
+    /* ===== Artifact Grid ===== */
+    .artifacts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .artifact-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      animation: slideIn 0.3s ease;
+    }
+
+    .artifact-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 30px var(--accent-glow);
+      transform: translateY(-4px);
+    }
+
+    .artifact-header {
+      background: linear-gradient(135deg, var(--accent) 0%, rgba(0, 217, 255, 0.1) 100%);
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .artifact-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.8; }
+    }
+
+    .artifact-content {
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .artifact-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      word-break: break-word;
+    }
+
+    .artifact-desc {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      flex: 1;
+      word-break: break-word;
+    }
+
+    .artifact-url {
+      color: var(--accent);
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      word-break: break-all;
+      opacity: 0.8;
+    }
+
+    .artifact-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .artifact-actions a {
+      flex: 1;
+      padding: 0.5rem;
+      background: var(--accent);
+      color: var(--bg-primary);
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .artifact-actions a:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .artifact-delete {
+      background: rgba(255, 68, 68, 0.2);
       color: var(--critical);
+      border: 1px solid var(--critical);
+    }
+
+    .artifact-delete:hover {
+      background: rgba(255, 68, 68, 0.3);
     }
 
     .empty-state {
       text-align: center;
       padding: 3rem 2rem;
       color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    /* ===== Footer ===== */
+    footer {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 640px) {
+      .container {
+        padding: 1rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .artifacts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      button {
+        padding: 0.75rem 1rem;
+      }
+
+      .tabs {
+        gap: 0.5rem;
+      }
+
+      .tab-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+      }
+    }
+
+    /* Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation: none !important;
+        transition: none !important;
+      }
     }
   </style>
 </head>
@@ -301,12 +645,13 @@
       <p class="subtitle">趣味の静的サイト制作プロジェクト、進捗管理</p>
     </header>
 
+    <!-- Tab Navigation -->
     <div class="tabs">
       <button class="tab-button active" data-tab="tasks">タスク管理</button>
       <button class="tab-button" data-tab="artifacts">成果物</button>
     </div>
 
-    <!-- タスク管理タブ -->
+    <!-- Tasks Tab Content -->
     <div id="tasks" class="tab-content active">
       <div class="stats">
         <div class="stat-card">
@@ -333,7 +678,7 @@
             </div>
             <div class="form-group">
               <label for="taskDesc">説明</label>
-              <textarea id="taskDesc" placeholder="このタスクの詳細を記入してください..." rows="4"></textarea>
+              <textarea id="taskDesc" placeholder="このタスクの詳細を記入してください..."></textarea>
             </div>
             <div class="form-group">
               <label for="taskPriority">優先度</label>
@@ -343,79 +688,115 @@
                 <option value="high">高</option>
               </select>
             </div>
-            <button type="submit" class="btn-primary">タスクを追加</button>
+            <div class="button-group">
+              <button type="submit" class="btn-primary">タスクを追加</button>
+              <button type="reset" class="btn-secondary">リセット</button>
+            </div>
           </form>
         </div>
 
-        <div class="list-card">
+        <div class="task-list-card">
           <h2 class="section-title">タスク一覧</h2>
-          <div id="taskList" class="list-items">
-            <div class="empty-state"><p>タスクはまだありません</p></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 成果物タブ -->
-    <div id="artifacts" class="tab-content">
-      <div class="list-card">
-        <h2 class="section-title">Netlifyデプロイ済み成果物</h2>
-        <div id="artifactList" class="list-items">
-          <div class="item">
-            <div>
-              <div class="item-title">政策整理メモ</div>
-              <div class="item-desc">北朝鮮のサイバー資金循環への対処と、日本の資源配分</div>
-              <div class="item-meta">2026年6月 | Netlify Dropでアップロード</div>
-              <div class="status-badge status-success">公開中</div>
+          <div id="taskList" class="task-list">
+            <div class="empty-state">
+              <div class="empty-state-icon">◯</div>
+              <p>タスクはまだありません</p>
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <h3 style="margin-top: 2rem; font-family: 'Space Grotesk'; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">新しい成果物を追加</h3>
-        <form id="artifactForm" style="display: grid; gap: 1rem;">
+    <!-- Artifacts Tab Content -->
+    <div id="artifacts" class="tab-content">
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-label">登録済み成果物</div>
+          <div class="stat-value" id="artifactCount">0</div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h2 class="section-title">新しい成果物を追加</h2>
+        <form id="artifactForm">
           <div class="form-group">
-            <label for="artifactName">成果物名 *</label>
-            <input type="text" id="artifactName" placeholder="例：ランディングページ" required>
+            <label for="artifactName">プロジェクト名 *</label>
+            <input type="text" id="artifactName" placeholder="例：政策整理メモ" required>
           </div>
           <div class="form-group">
             <label for="artifactDesc">説明</label>
-            <textarea id="artifactDesc" placeholder="成果物の説明..." rows="3"></textarea>
+            <textarea id="artifactDesc" placeholder="このプロジェクトについて..."></textarea>
           </div>
           <div class="form-group">
-            <label for="artifactUrl">Netlify URL</label>
-            <input type="text" id="artifactUrl" placeholder="https://xxx.netlify.app/">
+            <label for="artifactUrl">Netlify URL *</label>
+            <input type="url" id="artifactUrl" placeholder="https://example.netlify.app" required>
           </div>
-          <button type="submit" class="btn-primary">成果物を追加</button>
+          <div class="button-group">
+            <button type="submit" class="btn-primary">成果物を追加</button>
+            <button type="reset" class="btn-secondary">リセット</button>
+          </div>
         </form>
       </div>
+
+      <h2 class="section-title" style="margin-top: 2rem;">登録済み成果物</h2>
+      <div id="artifactGrid" class="artifacts-grid">
+        <div class="empty-state">
+          <div class="empty-state-icon">✧</div>
+          <p>成果物はまだ登録されていません</p>
+        </div>
+      </div>
     </div>
+
+    <footer>
+      <p>制作管理ダッシュボード v2.0 | データはセッション中に保持されます</p>
+    </footer>
   </div>
 
   <script>
-    // ===== タスク管理 =====
+    // ===== Tab Management =====
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const tabName = button.getAttribute('data-tab');
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        button.classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+      });
+    });
+
+    // ===== Task Management =====
     const taskForm = document.getElementById('taskForm');
     const taskTitle = document.getElementById('taskTitle');
     const taskDesc = document.getElementById('taskDesc');
     const taskPriority = document.getElementById('taskPriority');
     const taskList = document.getElementById('taskList');
+    const totalCount = document.getElementById('totalCount');
+    const completedCount = document.getElementById('completedCount');
+    const progressRate = document.getElementById('progressRate');
 
     let tasks = [];
-    let nextId = 1;
+    let nextTaskId = 1;
 
     function addTask(e) {
       e.preventDefault();
+
       if (!taskTitle.value.trim()) return;
 
-      tasks.push({
-        id: nextId++,
+      const task = {
+        id: nextTaskId++,
         title: taskTitle.value.trim(),
         description: taskDesc.value.trim(),
         priority: taskPriority.value,
-        completed: false
-      });
+        completed: false,
+        created: new Date().toLocaleString('ja-JP')
+      };
 
+      tasks.push(task);
       renderTasks();
-      updateTaskStats();
+      updateStats();
       taskForm.reset();
       taskTitle.focus();
     }
@@ -423,35 +804,123 @@
     function deleteTask(id) {
       tasks = tasks.filter(task => task.id !== id);
       renderTasks();
-      updateTaskStats();
+      updateStats();
     }
 
     function renderTasks() {
       if (tasks.length === 0) {
-        taskList.innerHTML = '<div class="empty-state"><p>タスクはまだありません</p></div>';
+        taskList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">◯</div>
+            <p>タスクはまだありません</p>
+          </div>
+        `;
         return;
       }
 
       taskList.innerHTML = tasks.map(task => `
-        <div class="item">
-          <div>
-            <div class="item-title">${escapeHtml(task.title)}</div>
-            ${task.description ? `<div class="item-desc">${escapeHtml(task.description)}</div>` : ''}
-            <div class="status-badge status-${task.priority === 'high' ? 'failed' : task.priority === 'medium' ? 'building' : 'success'}">
-              優先度: ${task.priority === 'high' ? '高' : task.priority === 'medium' ? '中' : '低'}
+        <div class="task-item">
+          <div class="task-content">
+            <div class="task-title">${escapeHtml(task.title)}</div>
+            ${task.description ? `<div class="task-desc">${escapeHtml(task.description)}</div>` : ''}
+            <div class="task-priority priority-${task.priority}">
+              ${getPriorityLabel(task.priority)}
             </div>
           </div>
-          <button class="item-delete" onclick="deleteTask(${task.id})">✕</button>
+          <button class="task-delete" onclick="deleteTask(${task.id})" title="削除">✕</button>
         </div>
       `).join('');
     }
 
-    function updateTaskStats() {
+    function updateStats() {
       const total = tasks.length;
       const completed = tasks.filter(t => t.completed).length;
-      document.getElementById('totalCount').textContent = total;
-      document.getElementById('completedCount').textContent = completed;
-      document.getElementById('progressRate').textContent = total === 0 ? '0%' : Math.round((completed / total) * 100) + '%';
+      const progress = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+      totalCount.textContent = total;
+      completedCount.textContent = completed;
+      progressRate.textContent = progress + '%';
+    }
+
+    function getPriorityLabel(priority) {
+      const labels = { high: '高', medium: '中', low: '低' };
+      return labels[priority] || '中';
+    }
+
+    // ===== Artifact Management =====
+    const artifactForm = document.getElementById('artifactForm');
+    const artifactName = document.getElementById('artifactName');
+    const artifactDesc = document.getElementById('artifactDesc');
+    const artifactUrl = document.getElementById('artifactUrl');
+    const artifactGrid = document.getElementById('artifactGrid');
+    const artifactCount = document.getElementById('artifactCount');
+
+    let artifacts = [
+      {
+        id: 1,
+        name: '政策整理メモ',
+        description: '政策関連の情報を整理したメモ',
+        url: 'https://tradeoff-frontier-jp.netlify.app/',
+        emoji: '📋'
+      }
+    ];
+    let nextArtifactId = 2;
+
+    function addArtifact(e) {
+      e.preventDefault();
+
+      if (!artifactName.value.trim() || !artifactUrl.value.trim()) return;
+
+      const artifact = {
+        id: nextArtifactId++,
+        name: artifactName.value.trim(),
+        description: artifactDesc.value.trim(),
+        url: artifactUrl.value.trim(),
+        emoji: '✨'
+      };
+
+      artifacts.push(artifact);
+      renderArtifacts();
+      updateArtifactCount();
+      artifactForm.reset();
+      artifactName.focus();
+    }
+
+    function deleteArtifact(id) {
+      artifacts = artifacts.filter(a => a.id !== id);
+      renderArtifacts();
+      updateArtifactCount();
+    }
+
+    function renderArtifacts() {
+      if (artifacts.length === 0) {
+        artifactGrid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">✧</div>
+            <p>成果物はまだ登録されていません</p>
+          </div>
+        `;
+        return;
+      }
+
+      artifactGrid.innerHTML = artifacts.map(artifact => `
+        <div class="artifact-card">
+          <div class="artifact-header">${artifact.emoji}</div>
+          <div class="artifact-content">
+            <div class="artifact-name">${escapeHtml(artifact.name)}</div>
+            ${artifact.description ? `<div class="artifact-desc">${escapeHtml(artifact.description)}</div>` : ''}
+            <div class="artifact-url">${escapeHtml(artifact.url)}</div>
+            <div class="artifact-actions">
+              <a href="${artifact.url}" target="_blank" rel="noopener noreferrer">表示</a>
+              <button class="artifact-delete" onclick="deleteArtifact(${artifact.id})" title="削除">削除</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateArtifactCount() {
+      artifactCount.textContent = artifacts.length;
     }
 
     function escapeHtml(text) {
@@ -460,79 +929,15 @@
       return div.innerHTML;
     }
 
+    // Event listeners
     taskForm.addEventListener('submit', addTask);
-
-    // ===== 成果物管理 =====
-    const artifactForm = document.getElementById('artifactForm');
-    const artifactName = document.getElementById('artifactName');
-    const artifactDesc = document.getElementById('artifactDesc');
-    const artifactUrl = document.getElementById('artifactUrl');
-    const artifactList = document.getElementById('artifactList');
-
-    let artifacts = [
-      {
-        id: 1,
-        name: '政策整理メモ',
-        description: '北朝鮮のサイバー資金循環への対処と、日本の資源配分',
-        url: 'https://tradeoff-frontier-jp.netlify.app/',
-        date: '2026年6月'
-      }
-    ];
-    let nextArtifactId = 2;
-
-    function addArtifact(e) {
-      e.preventDefault();
-      if (!artifactName.value.trim()) return;
-
-      artifacts.push({
-        id: nextArtifactId++,
-        name: artifactName.value.trim(),
-        description: artifactDesc.value.trim(),
-        url: artifactUrl.value.trim(),
-        date: new Date().toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric' })
-      });
-
-      renderArtifacts();
-      artifactForm.reset();
-      artifactName.focus();
-    }
-
-    function deleteArtifact(id) {
-      artifacts = artifacts.filter(a => a.id !== id);
-      renderArtifacts();
-    }
-
-    function renderArtifacts() {
-      artifactList.innerHTML = artifacts.map(artifact => `
-        <div class="item">
-          <div>
-            <div class="item-title">${escapeHtml(artifact.name)}</div>
-            ${artifact.description ? `<div class="item-desc">${escapeHtml(artifact.description)}</div>` : ''}
-            <div class="item-meta">${artifact.date}${artifact.url ? ' | <a href="' + escapeHtml(artifact.url) + '" target="_blank" style="color: var(--accent); text-decoration: none;">' + escapeHtml(artifact.url) + '</a>' : ''}</div>
-            <div class="status-badge status-success">公開中</div>
-          </div>
-          <button class="item-delete" onclick="deleteArtifact(${artifact.id})">✕</button>
-        </div>
-      `).join('');
-    }
-
     artifactForm.addEventListener('submit', addArtifact);
 
-    // ===== タブ切り替え =====
-    document.querySelectorAll('.tab-button').forEach(button => {
-      button.addEventListener('click', () => {
-        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        
-        button.classList.add('active');
-        document.getElementById(button.dataset.tab).classList.add('active');
-      });
-    });
-
-    // 初期化
-    updateTaskStats();
+    // Initialize
+    updateStats();
+    updateArtifactCount();
     renderTasks();
     renderArtifacts();
   </script>
 </body>
-</html>   
+</html>

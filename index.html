@@ -230,7 +230,7 @@
     </div>
 
     <footer>
-      <p>Netlifyプロジェクト一覧ダッシュボード v4.2</p>
+      <p>Netlifyプロジェクト一覧ダッシュボード v4.3</p>
     </footer>
   </div>
 
@@ -280,26 +280,43 @@
     }
 
     function renderNetlifySites(sites) {
-      if (sites.length === 0) {
-        artifactGrid.innerHTML = `<div class="empty-state">プロジェクトなし</div>`;
-        return;
+          async function fetchPageTitle(url) {
+      try {
+        const response = await fetch(url);
+        const html = await response.text();
+        const match = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+        return match ? match[1] : null;
+      } catch (error) {
+        return null;
       }
-
-      artifactGrid.innerHTML = sites.map((site, index) => {
-        const url = site.url || site.ssl_url || `https://${site.name}.netlify.app`;
-        return `
-          <div class="artifact-card">
-            <div class="artifact-content">
-              <div class="artifact-name">${site.name}</div>
-              <div class="artifact-url">${url}</div>
-              <div class="artifact-actions">
-                <a href="${url}" target="_blank">表示</a>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
     }
+
+    async function renderNetlifySites(sites) {
+  if (sites.length === 0) {
+    artifactGrid.innerHTML = `<div class="empty-state">プロジェクトなし</div>`;
+    return;
+  }
+
+  const cardsHtml = await Promise.all(sites.map(async (site) => {
+    const url = site.url || site.ssl_url || `https://${site.name}.netlify.app`;
+    const pageTitle = await fetchPageTitle(url);
+    const displayName = pageTitle || site.name;
+
+    return `
+      <div class="artifact-card">
+        <div class="artifact-content">
+          <div class="artifact-name">${displayName}</div>
+          <div class="artifact-url">${url}</div>
+          <div class="artifact-actions">
+            <a href="${url}" target="_blank">表示</a>
+          </div>
+        </div>
+      </div>
+    `;
+  }));
+
+  artifactGrid.innerHTML = cardsHtml.join('');
+}
 
     if (NETLIFY_TOKEN === 'nfp_5xi656QWKZwC2AGm77KEmXNeDcUDySHV0510') {
       fetchNetlifySites();

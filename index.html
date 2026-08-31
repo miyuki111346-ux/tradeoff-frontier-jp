@@ -50,42 +50,6 @@
     margin-top: 0.5rem;
   }
 
-  .tabs {
-    display: flex;
-    gap: 2rem;
-    margin-bottom: 3rem;
-    border-bottom: 1px solid #f0f0f0;
-  }
-
-  .tab-button {
-    background: transparent;
-    border: none;
-    color: #999999;
-    padding: 1rem 0;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s ease;
-  }
-
-  .tab-button:hover {
-    color: #0a0a0a;
-  }
-
-  .tab-button.active {
-    color: #0a0a0a;
-    border-bottom-color: #7c3aed;
-  }
-
-  .tab-content {
-    display: none;
-  }
-
-  .tab-content.active {
-    display: block;
-  }
-
   .stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -130,94 +94,6 @@
     font-weight: 700;
     margin-bottom: 2rem;
     margin-top: 3rem;
-  }
-
-  .form-card {
-    background: #fafafa;
-    border: 1px solid #f0f0f0;
-    border-radius: 12px;
-    padding: 2.5rem;
-    margin-bottom: 3rem;
-  }
-
-  .form-group {
-    margin-bottom: 1.5rem;
-  }
-
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #333333;
-    font-size: 0.95rem;
-    font-weight: 600;
-  }
-
-  input[type="text"],
-  input[type="url"],
-  select,
-  textarea {
-    width: 100%;
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
-    color: #0a0a0a;
-    padding: 0.875rem 1rem;
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 1rem;
-    transition: all 0.2s ease;
-  }
-
-  input[type="text"]:focus,
-  input[type="url"]:focus,
-  select:focus,
-  textarea:focus {
-    outline: none;
-    border-color: #7c3aed;
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-  }
-
-  textarea {
-    resize: vertical;
-    min-height: 120px;
-  }
-
-  .button-group {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-  }
-
-  button {
-    flex: 1;
-    padding: 1rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, #000000 0%, #7c3aed 100%);
-    color: #ffffff;
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
-  }
-
-  .btn-secondary {
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
-    color: #0a0a0a;
-  }
-
-  .btn-secondary:hover {
-    background: #fafafa;
-    border-color: #7c3aed;
-    color: #7c3aed;
   }
 
   .artifacts-grid {
@@ -304,12 +180,6 @@
     color: #999999;
   }
 
-  .empty-state-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-  }
-
   footer {
     margin-top: 4rem;
     padding-top: 2rem;
@@ -335,10 +205,6 @@
     .artifacts-grid {
       grid-template-columns: 1fr;
     }
-
-    .tabs {
-      gap: 1rem;
-    }
   }
 </style>
 </head>
@@ -346,13 +212,8 @@
   <div class="container">
     <header>
       <h1>制作管理ダッシュボード</h1>
-      <p class="subtitle">Netlifyプロジェクト一覧・タスク管理</p>
+      <p class="subtitle">Netlifyプロジェクト一覧</p>
     </header>
-
-    <div class="tabs">
-      <button class="tab-button active" data-tab="artifacts">成果物</button>
-      <button class="tab-button" data-tab="tasks">タスク管理</button>
-    </div>
 
     <div id="artifacts" class="tab-content active">
       <div class="stats">
@@ -368,55 +229,13 @@
       </div>
     </div>
 
-    <div id="tasks" class="tab-content">
-      <div class="stats">
-        <div class="stat-card">
-          <div class="stat-label">総タスク数</div>
-          <div class="stat-value" id="totalCount">0</div>
-        </div>
-      </div>
-
-      <div class="form-card">
-        <h2 class="section-title">新しいタスクを追加</h2>
-        <form id="taskForm">
-          <div class="form-group">
-            <label for="taskTitle">タスク名 *</label>
-            <input type="text" id="taskTitle" placeholder="タスク名" required>
-          </div>
-          <div class="button-group">
-            <button type="submit" class="btn-primary">追加</button>
-          </div>
-        </form>
-      </div>
-
-      <div id="taskList" class="form-card" style="margin-top: 2rem;">
-        <h2 class="section-title">タスク一覧</h2>
-        <div style="display: flex; flex-direction: column; gap: 1rem;" id="taskListContainer">
-          <div class="empty-state">タスクなし</div>
-        </div>
-      </div>
-    </div>
-
     <footer>
-      <p>制作管理ダッシュボード v3.0</p>
+      <p>制作管理ダッシュボード v4.0</p>
     </footer>
   </div>
 
   <script>
     const NETLIFY_TOKEN = 'nfp_5xi656QWKZwC2AGm77KEmXNeDcUDySHV0510'
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const tabName = button.getAttribute('data-tab');
-        tabButtons.forEach(b => b.classList.remove('active'));
-        tabContents.forEach(c => c.classList.remove('active'));
-        button.classList.add('active');
-        document.getElementById(tabName).classList.add('active');
-      });
-    });
-
     const artifactGrid = document.getElementById('artifactGrid');
     const artifactCount = document.getElementById('artifactCount');
 
@@ -461,36 +280,26 @@
     }
 
     function renderNetlifySites(sites) {
-  if (sites.length === 0) {
-    artifactGrid.innerHTML = `<div class="empty-state">プロジェクトなし</div>`;
-    return;
-  }
+      if (sites.length === 0) {
+        artifactGrid.innerHTML = `<div class="empty-state">プロジェクトなし</div>`;
+        return;
+      }
 
-  // サイト名をタスクとして自動追加
-  const existingTaskNames = tasks.map(t => t.title);
-  sites.forEach(site => {
-    if (!existingTaskNames.includes(site.name)) {
-      tasks.push({ id: Date.now() + Math.random(), title: site.name });
-    }
-  });
-  renderTasks();
-  updateStats();
-
-  artifactGrid.innerHTML = sites.map((site, index) => {
-    const url = site.url || site.ssl_url || `https://${site.name}.netlify.app`;
-    return `
-      <div class="artifact-card">
-        <div class="artifact-content">
-          <div class="artifact-name">${site.name}</div>
-          <div class="artifact-url">${url}</div>
-          <div class="artifact-actions">
-            <a href="${url}" target="_blank">表示</a>
+      artifactGrid.innerHTML = sites.map((site, index) => {
+        const url = site.url || site.ssl_url || `https://${site.name}.netlify.app`;
+        return `
+          <div class="artifact-card">
+            <div class="artifact-content">
+              <div class="artifact-name">${site.name}</div>
+              <div class="artifact-url">${url}</div>
+              <div class="artifact-actions">
+                <a href="${url}" target="_blank">表示</a>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
+        `;
+      }).join('');
+    }
 
     if (NETLIFY_TOKEN === 'nfp_5xi656QWKZwC2AGm77KEmXNeDcUDySHV0510') {
       fetchNetlifySites();
@@ -501,47 +310,6 @@
         </div>
       `;
     }
-
-    // Task管理
-    const taskForm = document.getElementById('taskForm');
-    const taskTitle = document.getElementById('taskTitle');
-    const totalCount = document.getElementById('totalCount');
-    const taskListContainer = document.getElementById('taskListContainer');
-    let tasks = [];
-
-    taskForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (!taskTitle.value.trim()) return;
-      tasks.push({ id: Date.now(), title: taskTitle.value.trim() });
-      taskTitle.value = '';
-      renderTasks();
-      updateStats();
-    });
-
-    function renderTasks() {
-      if (tasks.length === 0) {
-        taskListContainer.innerHTML = '<div class="empty-state">タスクなし</div>';
-        return;
-      }
-      taskListContainer.innerHTML = tasks.map(task => `
-        <div style="padding: 1rem; background: var(--bg-tertiary); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-          <span>${task.title}</span>
-          <button onclick="deleteTask(${task.id})" style="background: #ff4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">削除</button>
-        </div>
-      `).join('');
-    }
-
-    function deleteTask(id) {
-      tasks = tasks.filter(t => t.id !== id);
-      renderTasks();
-      updateStats();
-    }
-
-    function updateStats() {
-      totalCount.textContent = tasks.length;
-    }
-
-    renderTasks();
   </script>
 </body>
 </html>

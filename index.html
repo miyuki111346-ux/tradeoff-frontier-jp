@@ -50,7 +50,6 @@
     margin-top: 0.5rem;
   }
 
-
   .stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -97,94 +96,6 @@
     margin-top: 3rem;
   }
 
-  .form-card {
-    background: #fafafa;
-    border: 1px solid #f0f0f0;
-    border-radius: 12px;
-    padding: 2.5rem;
-    margin-bottom: 3rem;
-  }
-
-  .form-group {
-    margin-bottom: 1.5rem;
-  }
-
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #333333;
-    font-size: 0.95rem;
-    font-weight: 600;
-  }
-
-  input[type="text"],
-  input[type="url"],
-  select,
-  textarea {
-    width: 100%;
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
-    color: #0a0a0a;
-    padding: 0.875rem 1rem;
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 1rem;
-    transition: all 0.2s ease;
-  }
-
-  input[type="text"]:focus,
-  input[type="url"]:focus,
-  select:focus,
-  textarea:focus {
-    outline: none;
-    border-color: #7c3aed;
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-  }
-
-  textarea {
-    resize: vertical;
-    min-height: 120px;
-  }
-
-  .button-group {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-  }
-
-  button {
-    flex: 1;
-    padding: 1rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, #000000 0%, #7c3aed 100%);
-    color: #ffffff;
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
-  }
-
-  .btn-secondary {
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
-    color: #0a0a0a;
-  }
-
-  .btn-secondary:hover {
-    background: #fafafa;
-    border-color: #7c3aed;
-    color: #7c3aed;
-  }
-
   .artifacts-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -209,17 +120,7 @@
     transform: translateY(-4px);
   }
 
-  .artifact-header {
-    background: linear-gradient(135deg, #f5f5f5 0%, #efefef 100%);
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3rem;
-  }
-
   .artifact-content {
-    padding: 0;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -279,12 +180,6 @@
     color: #999999;
   }
 
-  .empty-state-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-  }
-
   footer {
     margin-top: 4rem;
     padding-top: 2rem;
@@ -303,16 +198,8 @@
       font-size: 2.5rem;
     }
 
-    .stats {
-      grid-template-columns: 1fr;
-    }
-
     .artifacts-grid {
       grid-template-columns: 1fr;
-    }
-
-    .tabs {
-      gap: 1rem;
     }
   }
 </style>
@@ -338,7 +225,7 @@
     </div>
 
     <footer>
-      <p>Netlifyプロジェクト一覧ダッシュボード v4.3</p>
+      <p>Netlifyプロジェクト一覧ダッシュボード v4.4</p>
     </footer>
   </div>
 
@@ -349,11 +236,28 @@
 
     async function fetchPageTitle(url) {
       try {
-        const response = await fetch(url);
+        // HTTPS に統一
+        let httpsUrl = url.replace('http://', 'https://');
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒タイムアウト
+        
+        const response = await fetch(httpsUrl, {
+          signal: controller.signal,
+          mode: 'no-cors'
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok && response.status !== 0) {
+          return null;
+        }
+        
         const html = await response.text();
         const match = html.match(/<title[^>]*>([^<]+)<\/title>/i);
         return match ? match[1] : null;
       } catch (error) {
+        console.log(`Title fetch failed for ${url}:`, error.message);
         return null;
       }
     }

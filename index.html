@@ -292,22 +292,6 @@
       padding: 3rem 2rem;
       color: var(--text-muted);
     }
-
-    .loading {
-      text-align: center;
-      padding: 2rem;
-      color: var(--text-muted);
-    }
-
-    .deploy-link {
-      color: var(--accent);
-      text-decoration: none;
-      word-break: break-all;
-    }
-
-    .deploy-link:hover {
-      text-decoration: underline;
-    }
   </style>
 </head>
 <body>
@@ -319,7 +303,7 @@
 
     <div class="tabs">
       <button class="tab-button active" data-tab="tasks">タスク管理</button>
-      <button class="tab-button" data-tab="deployments">Netlifyデプロイ</button>
+      <button class="tab-button" data-tab="artifacts">成果物</button>
     </div>
 
     <!-- タスク管理タブ -->
@@ -372,36 +356,42 @@
       </div>
     </div>
 
-    <!-- Netlifyデプロイタブ -->
-    <div id="deployments" class="tab-content">
-      <div class="stats">
-        <div class="stat-card">
-          <div class="stat-label">総デプロイ数</div>
-          <div class="stat-value" id="deployCount">-</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">成功</div>
-          <div class="stat-value" id="deploySuccess">-</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">最新ステータス</div>
-          <div class="stat-value" id="deployLatestStatus">-</div>
-        </div>
-      </div>
-
+    <!-- 成果物タブ -->
+    <div id="artifacts" class="tab-content">
       <div class="list-card">
-        <h2 class="section-title">デプロイ履歴</h2>
-        <div id="deployList" class="list-items">
-          <div class="loading">読み込み中...</div>
+        <h2 class="section-title">Netlifyデプロイ済み成果物</h2>
+        <div id="artifactList" class="list-items">
+          <div class="item">
+            <div>
+              <div class="item-title">政策整理メモ</div>
+              <div class="item-desc">北朝鮮のサイバー資金循環への対処と、日本の資源配分</div>
+              <div class="item-meta">2026年6月 | Netlify Dropでアップロード</div>
+              <div class="status-badge status-success">公開中</div>
+            </div>
+          </div>
         </div>
+
+        <h3 style="margin-top: 2rem; font-family: 'Space Grotesk'; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">新しい成果物を追加</h3>
+        <form id="artifactForm" style="display: grid; gap: 1rem;">
+          <div class="form-group">
+            <label for="artifactName">成果物名 *</label>
+            <input type="text" id="artifactName" placeholder="例：ランディングページ" required>
+          </div>
+          <div class="form-group">
+            <label for="artifactDesc">説明</label>
+            <textarea id="artifactDesc" placeholder="成果物の説明..." rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="artifactUrl">Netlify URL</label>
+            <input type="text" id="artifactUrl" placeholder="https://xxx.netlify.app/">
+          </div>
+          <button type="submit" class="btn-primary">成果物を追加</button>
+        </form>
       </div>
     </div>
   </div>
 
   <script>
-    const NETLIFY_API_TOKEN = 'nfp_aspdLcVAyCriSnYdadDMCM9rZ4VxyoSu0ce3';
-    const NETLIFY_SITE_ID = 'tradeoff-frontier-jp';
-
     // ===== タスク管理 =====
     const taskForm = document.getElementById('taskForm');
     const taskTitle = document.getElementById('taskTitle');
@@ -472,61 +462,61 @@
 
     taskForm.addEventListener('submit', addTask);
 
-    // ===== Netlifyデプロイ取得 =====
-    async function fetchNetlifyDeployments() {
-      try {
-        const response = await fetch(`https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/deploys`, {
-          headers: {
-            'Authorization': `Bearer ${NETLIFY_API_TOKEN}`
-          }
-        });
+    // ===== 成果物管理 =====
+    const artifactForm = document.getElementById('artifactForm');
+    const artifactName = document.getElementById('artifactName');
+    const artifactDesc = document.getElementById('artifactDesc');
+    const artifactUrl = document.getElementById('artifactUrl');
+    const artifactList = document.getElementById('artifactList');
 
-        if (!response.ok) throw new Error('Failed to fetch deployments');
-
-        const deploys = await response.json();
-        renderDeployments(deploys);
-        updateDeployStats(deploys);
-      } catch (error) {
-        document.getElementById('deployList').innerHTML = `<div class="empty-state"><p>デプロイ情報を取得できませんでした</p></div>`;
+    let artifacts = [
+      {
+        id: 1,
+        name: '政策整理メモ',
+        description: '北朝鮮のサイバー資金循環への対処と、日本の資源配分',
+        url: 'https://tradeoff-frontier-jp.netlify.app/',
+        date: '2026年6月'
       }
+    ];
+    let nextArtifactId = 2;
+
+    function addArtifact(e) {
+      e.preventDefault();
+      if (!artifactName.value.trim()) return;
+
+      artifacts.push({
+        id: nextArtifactId++,
+        name: artifactName.value.trim(),
+        description: artifactDesc.value.trim(),
+        url: artifactUrl.value.trim(),
+        date: new Date().toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric' })
+      });
+
+      renderArtifacts();
+      artifactForm.reset();
+      artifactName.focus();
     }
 
-    function renderDeployments(deploys) {
-      if (!deploys || deploys.length === 0) {
-        document.getElementById('deployList').innerHTML = '<div class="empty-state"><p>デプロイがありません</p></div>';
-        return;
-      }
+    function deleteArtifact(id) {
+      artifacts = artifacts.filter(a => a.id !== id);
+      renderArtifacts();
+    }
 
-      document.getElementById('deployList').innerHTML = deploys.slice(0, 10).map(deploy => `
+    function renderArtifacts() {
+      artifactList.innerHTML = artifacts.map(artifact => `
         <div class="item">
           <div>
-            <div class="item-title">デプロイ ID: ${deploy.id.slice(0, 8)}</div>
-            <div class="item-desc">
-              <a href="${deploy.deploy_url}" class="deploy-link" target="_blank">${deploy.deploy_url}</a>
-            </div>
-            <div class="item-meta">
-              ${new Date(deploy.created_at).toLocaleString('ja-JP')}
-            </div>
-            <div class="status-badge status-${deploy.state === 'ready' ? 'success' : deploy.state === 'building' ? 'building' : 'failed'}">
-              ${deploy.state === 'ready' ? '成功' : deploy.state === 'building' ? 'ビルド中' : '失敗'}
-            </div>
+            <div class="item-title">${escapeHtml(artifact.name)}</div>
+            ${artifact.description ? `<div class="item-desc">${escapeHtml(artifact.description)}</div>` : ''}
+            <div class="item-meta">${artifact.date}${artifact.url ? ' | <a href="' + escapeHtml(artifact.url) + '" target="_blank" style="color: var(--accent); text-decoration: none;">' + escapeHtml(artifact.url) + '</a>' : ''}</div>
+            <div class="status-badge status-success">公開中</div>
           </div>
+          <button class="item-delete" onclick="deleteArtifact(${artifact.id})">✕</button>
         </div>
       `).join('');
     }
 
-    function updateDeployStats(deploys) {
-      if (!deploys) deploys = [];
-      const total = deploys.length;
-      const success = deploys.filter(d => d.state === 'ready').length;
-      const latest = deploys[0];
-
-      document.getElementById('deployCount').textContent = total;
-      document.getElementById('deploySuccess').textContent = success;
-      document.getElementById('deployLatestStatus').textContent = latest 
-        ? (latest.state === 'ready' ? '成功' : latest.state === 'building' ? 'ビルド中' : '失敗')
-        : '-';
-    }
+    artifactForm.addEventListener('submit', addArtifact);
 
     // ===== タブ切り替え =====
     document.querySelectorAll('.tab-button').forEach(button => {
@@ -536,16 +526,13 @@
         
         button.classList.add('active');
         document.getElementById(button.dataset.tab).classList.add('active');
-
-        if (button.dataset.tab === 'deployments') {
-          fetchNetlifyDeployments();
-        }
       });
     });
 
     // 初期化
     updateTaskStats();
     renderTasks();
+    renderArtifacts();
   </script>
 </body>
-</html>
+</html>   

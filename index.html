@@ -225,7 +225,7 @@
     </div>
 
     <footer>
-      <p>Netlifyプロジェクト一覧ダッシュボード v4.4</p>
+      <p>Netlifyプロジェクト一覧ダッシュボード v4.5</p>
     </footer>
   </div>
 
@@ -233,34 +233,6 @@
     const NETLIFY_TOKEN = 'nfp_WfXPysUc9VFfbBFt2SeFMznyRtkEZMFi6ebb'
     const artifactGrid = document.getElementById('artifactGrid');
     const artifactCount = document.getElementById('artifactCount');
-
-    async function fetchPageTitle(url) {
-      try {
-        // HTTPS に統一
-        let httpsUrl = url.replace('http://', 'https://');
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒タイムアウト
-        
-        const response = await fetch(httpsUrl, {
-          signal: controller.signal,
-          mode: 'no-cors'
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (!response.ok && response.status !== 0) {
-          return null;
-        }
-        
-        const html = await response.text();
-        const match = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-        return match ? match[1] : null;
-      } catch (error) {
-        console.log(`Title fetch failed for ${url}:`, error.message);
-        return null;
-      }
-    }
 
     async function fetchNetlifySites() {
       try {
@@ -302,16 +274,17 @@
       }
     }
 
-    async function renderNetlifySites(sites) {
+    function renderNetlifySites(sites) {
       if (sites.length === 0) {
         artifactGrid.innerHTML = `<div class="empty-state">プロジェクトなし</div>`;
         return;
       }
 
-      const cardsHtml = await Promise.all(sites.map(async (site) => {
+      const cardsHtml = sites.map((site) => {
+        // Netlify API から得られる情報を使用
         const url = site.url || site.ssl_url || `https://${site.name}.netlify.app`;
-        const pageTitle = await fetchPageTitle(url);
-        const displayName = pageTitle || site.name;
+        // site.name を表示（サイト内での設定名。日本語が含まれていれば表示される）
+        const displayName = site.name || 'Unnamed Project';
 
         return `
           <div class="artifact-card">
@@ -324,9 +297,9 @@
             </div>
           </div>
         `;
-      }));
+      }).join('');
 
-      artifactGrid.innerHTML = cardsHtml.join('');
+      artifactGrid.innerHTML = cardsHtml;
     }
 
     if (NETLIFY_TOKEN === 'nfp_WfXPysUc9VFfbBFt2SeFMznyRtkEZMFi6ebb') {

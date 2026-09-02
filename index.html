@@ -180,6 +180,13 @@
     color: #999999;
   }
 
+  .progress-text {
+    text-align: center;
+    color: #999999;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
   footer {
     margin-top: 4rem;
     padding-top: 2rem;
@@ -219,13 +226,14 @@
       </div>
 
       <h2 class="section-title">Netlifyプロジェクト一覧</h2>
+      <div id="progressText" class="progress-text"></div>
       <div id="artifactGrid" class="artifacts-grid">
         <div class="loading">読み込み中...</div>
       </div>
     </div>
 
     <footer>
-      <p>Netlifyプロジェクト一覧ダッシュボード v4.5</p>
+      <p>Netlifyプロジェクト一覧ダッシュボード v5.0</p>
     </footer>
   </div>
 
@@ -233,6 +241,52 @@
     const NETLIFY_TOKEN = 'nfp_WfXPysUc9VFfbBFt2SeFMznyRtkEZMFi6ebb'
     const artifactGrid = document.getElementById('artifactGrid');
     const artifactCount = document.getElementById('artifactCount');
+    const progressText = document.getElementById('progressText');
+
+    // CORSプロキシ経由でHTMLを取得し、日本語タイトルを抽出
+    async function fetchPageTitle(url) {
+      try {
+        const httpsUrl = url.replace('http://', 'https://');
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(httpsUrl)}`;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+        const response = await fetch(proxyUrl, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) return null;
+
+        const html = await response.text();
+        const match = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+        return match ? match[1].trim() : null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    // 同時実行数を制限しながら全サイトのタイトルを取得
+    async function fetchTitlesWithConcurrency(sites, concurrency = 6) {
+      const results = new Array(sites.length);
+      let index = 0;
+      let completed = 0;
+
+      async function worker() {
+        while (index < sites.length) {
+          const current = index++;
+          const site = sites[current];
+          const url = site.url || site.ssl_url || `https://${site.name}.netlify.app`;
+          const title = await fetchPageTitle(url);
+          results[current] = title;
+          completed++;
+          progressText.textContent = `日本語タイトルを取得中... (${completed}/${sites.length})`;
+        }
+      }
+
+      const workers = Array.from({ length: concurrency }, () => worker());
+      await Promise.all(workers);
+      return results;
+    }
 
     async function fetchNetlifySites() {
       try {
@@ -261,8 +315,15 @@
           page++;
         }
 
-        renderNetlifySites(allSites);
         artifactCount.textContent = allSites.length;
+
+        // まずサイト名で即座に表示
+        renderNetlifySites(allSites, allSites.map(() => null));
+
+        // その後、日本語タイトルを取得して更新
+        const titles = await fetchTitlesWithConcurrency(allSites);
+        progressText.textContent = '';
+        renderNetlifySites(allSites, titles);
       } catch (error) {
         artifactGrid.innerHTML = `
           <div class="empty-state">
@@ -274,17 +335,15 @@
       }
     }
 
-    function renderNetlifySites(sites) {
+    function renderNetlifySites(sites, titles) {
       if (sites.length === 0) {
         artifactGrid.innerHTML = `<div class="empty-state">プロジェクトなし</div>`;
         return;
       }
 
-      const cardsHtml = sites.map((site) => {
-        // Netlify API から得られる情報を使用
+      const cardsHtml = sites.map((site, i) => {
         const url = site.url || site.ssl_url || `https://${site.name}.netlify.app`;
-        // site.name を表示（サイト内での設定名。日本語が含まれていれば表示される）
-        const displayName = site.name || 'Unnamed Project';
+        const displayName = titles[i] || site.name;
 
         return `
           <div class="artifact-card">

@@ -57,7 +57,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
-    margin-bottom: 2rem;
+    margin-top: 0.75rem;
   }
 
   .stat-card {
@@ -102,6 +102,7 @@
     flex-wrap: wrap;
     gap: 0.75rem;
     align-items: center;
+    margin-top: 2rem;
     margin-bottom: 1.5rem;
   }
 
@@ -332,16 +333,15 @@
   <div class="container">
     <header>
       <h1>日本政策・戦略資料アーカイブ</h1>
-    </header>
-
-    <div id="artifacts" class="tab-content active">
       <div class="stats">
         <div class="stat-card">
           <div class="stat-label">登録済み成果物</div>
           <div class="stat-value" id="artifactCount">0</div>
         </div>
       </div>
+    </header>
 
+    <div id="artifacts" class="tab-content active">
       <div class="controls">
         <input type="text" id="searchInput" class="search-input" placeholder="キーワードで検索（タイトル・URL）">
         <select id="sortSelect" class="sort-select">

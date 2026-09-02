@@ -27,7 +27,7 @@
   }
 
   header {
-    margin-bottom: 4rem;
+    margin-bottom: 3rem;
     padding-bottom: 2rem;
     border-bottom: 1px solid #f0f0f0;
   }
@@ -54,7 +54,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
   }
 
   .stat-card {
@@ -94,6 +94,87 @@
     background-clip: text;
   }
 
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-input {
+    flex: 1;
+    min-width: 220px;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    color: #0a0a0a;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: #7c3aed;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  }
+
+  .sort-select {
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    color: #0a0a0a;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .sort-select:focus {
+    outline: none;
+    border-color: #7c3aed;
+  }
+
+  .category-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .category-chip {
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    color: #666666;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .category-chip:hover {
+    border-color: #7c3aed;
+    color: #7c3aed;
+  }
+
+  .category-chip.active {
+    background: linear-gradient(135deg, #000000 0%, #7c3aed 100%);
+    border-color: transparent;
+    color: #ffffff;
+  }
+
+  .result-count {
+    color: #999999;
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+  }
+
   .artifacts-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -110,12 +191,42 @@
     display: flex;
     flex-direction: column;
     padding: 1.5rem;
+    position: relative;
   }
 
   .artifact-card:hover {
     border-color: #7c3aed;
     box-shadow: 0 20px 50px rgba(124, 58, 237, 0.15);
     transform: translateY(-4px);
+  }
+
+  .artifact-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .category-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #7c3aed;
+    background: rgba(124, 58, 237, 0.08);
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .new-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(135deg, #000000 0%, #7c3aed 100%);
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    white-space: nowrap;
   }
 
   .artifact-content {
@@ -206,6 +317,11 @@
     .artifacts-grid {
       grid-template-columns: 1fr;
     }
+
+    .controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
   }
 </style>
 </head>
@@ -223,6 +339,18 @@
         </div>
       </div>
 
+      <div class="controls">
+        <input type="text" id="searchInput" class="search-input" placeholder="キーワードで検索（タイトル・URL）">
+        <select id="sortSelect" class="sort-select">
+          <option value="updated_desc">更新が新しい順</option>
+          <option value="updated_asc">更新が古い順</option>
+          <option value="name_asc">タイトル順（A→Z）</option>
+        </select>
+      </div>
+
+      <div id="categoryFilters" class="category-filters"></div>
+
+      <div id="resultCount" class="result-count"></div>
       <div id="progressText" class="progress-text"></div>
       <div id="artifactGrid" class="artifacts-grid">
         <div class="loading">読み込み中...</div>
@@ -230,7 +358,7 @@
     </div>
 
     <footer>
-      <p>日本政策・戦略資料アーカイブ v5.2</p>
+      <p>日本政策・戦略資料アーカイブ v6.0</p>
     </footer>
   </div>
 
@@ -239,8 +367,41 @@
     const artifactGrid = document.getElementById('artifactGrid');
     const artifactCount = document.getElementById('artifactCount');
     const progressText = document.getElementById('progressText');
+    const searchInput = document.getElementById('searchInput');
+    const sortSelect = document.getElementById('sortSelect');
+    const categoryFiltersEl = document.getElementById('categoryFilters');
+    const resultCountEl = document.getElementById('resultCount');
 
-    // Netlify Function経由でHTMLを取得し、日本語タイトルを抽出（CORS回避）
+    const CATEGORY_RULES = [
+      { key: 'ai_quantum', label: 'AI・量子・先端技術', keywords: ['AI', '量子', 'QRD', 'ロボット', '半導体', '基盤モデル'] },
+      { key: 'zeisei', label: '税制・財政', keywords: ['税制', '税額控除', '消費税', '所得税', '減税', '税率'] },
+      { key: 'kinyu', label: '金融・資産運用', keywords: ['金融', '資産運用', '銀行', '証券', 'ガバナンス・コード'] },
+      { key: 'shakai_hosho', label: '社会保障・医療福祉', keywords: ['社会福祉', '健康保険', '社会保障', '医療', '介護', '福祉', '給付'] },
+      { key: 'bosai', label: '防災・危機管理', keywords: ['防災', '災害', '危機管理', '震災', '地震'] },
+      { key: 'energy_gx', label: 'エネルギー・GX', keywords: ['GX', 'エネルギー', 'ソーラー', '電気事業法'] },
+      { key: 'chiiki_sangyo', label: '地域・産業クラスター', keywords: ['地域', 'クラスター', '産業競争力', '産業技術', '成長戦略', '成長投資'] },
+      { key: 'kyoiku', label: '教育・人材', keywords: ['教育', '学校', 'GIGA', '人材'] },
+      { key: 'gaikou_anpo', label: '外交・安全保障・国際', keywords: ['外為', '安全保障', '治安', '国際', 'パートナーシップ', '世界銀行', '南極条約', '中露', '関係性'] },
+      { key: 'hosei', label: '法改正・規制改革', keywords: ['法律', '法案', '規制改革', '改正'] },
+      { key: 'kotsu_infra', label: '交通・インフラ', keywords: ['交通', 'インフラ', '下水道', '船舶', '宇宙'] },
+      { key: 'sonota', label: 'その他・分析レポート', keywords: [] }
+    ];
+
+    function classifyTitle(title) {
+      if (!title) return 'sonota';
+      for (const rule of CATEGORY_RULES) {
+        if (rule.keywords.some(kw => title.includes(kw))) {
+          return rule.key;
+        }
+      }
+      return 'sonota';
+    }
+
+    function categoryLabel(key) {
+      const rule = CATEGORY_RULES.find(r => r.key === key);
+      return rule ? rule.label : 'その他・分析レポート';
+    }
+
     async function fetchPageTitle(url) {
       try {
         const httpsUrl = url.replace('http://', 'https://');
@@ -261,7 +422,6 @@
       }
     }
 
-    // 同時実行数を制限しながら全サイトのタイトルを取得
     async function fetchTitlesWithConcurrency(sites, concurrency = 10) {
       const results = new Array(sites.length);
       let index = 0;
@@ -282,6 +442,106 @@
       const workers = Array.from({ length: concurrency }, () => worker());
       await Promise.all(workers);
       return results;
+    }
+
+    let allItems = [];
+    let activeCategory = 'all';
+
+    function buildItems(sites, titles) {
+      return sites.map((site, i) => {
+        const url = site.url || site.ssl_url || `https://${site.name}.netlify.app`;
+        const displayName = titles[i] || site.name;
+        return {
+          site,
+          url,
+          displayName,
+          category: classifyTitle(titles[i]),
+          updatedAt: site.updated_at || site.published_at || site.created_at || null
+        };
+      });
+    }
+
+    function isNew(updatedAt) {
+      if (!updatedAt) return false;
+      const days = (Date.now() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24);
+      return days <= 7;
+    }
+
+    function renderCategoryFilters(items) {
+      const counts = {};
+      items.forEach(it => { counts[it.category] = (counts[it.category] || 0) + 1; });
+
+      const usedRules = CATEGORY_RULES.filter(r => counts[r.key]);
+
+      const chips = [
+        `<button class="category-chip ${activeCategory === 'all' ? 'active' : ''}" data-category="all">すべて (${items.length})</button>`
+      ].concat(usedRules.map(r =>
+        `<button class="category-chip ${activeCategory === r.key ? 'active' : ''}" data-category="${r.key}">${r.label} (${counts[r.key]})</button>`
+      ));
+
+      categoryFiltersEl.innerHTML = chips.join('');
+
+      categoryFiltersEl.querySelectorAll('.category-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeCategory = btn.dataset.category;
+          applyFiltersAndRender();
+        });
+      });
+    }
+
+    function applyFiltersAndRender() {
+      const query = searchInput.value.trim().toLowerCase();
+      const sortMode = sortSelect.value;
+
+      let filtered = allItems.filter(it => {
+        const matchesCategory = activeCategory === 'all' || it.category === activeCategory;
+        const matchesQuery = !query ||
+          it.displayName.toLowerCase().includes(query) ||
+          it.url.toLowerCase().includes(query);
+        return matchesCategory && matchesQuery;
+      });
+
+      filtered.sort((a, b) => {
+        if (sortMode === 'name_asc') {
+          return a.displayName.localeCompare(b.displayName, 'ja');
+        }
+        const aTime = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+        const bTime = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+        return sortMode === 'updated_asc' ? aTime - bTime : bTime - aTime;
+      });
+
+      renderCategoryFilters(allItems);
+      resultCountEl.textContent = `${filtered.length} 件表示中（全 ${allItems.length} 件）`;
+      renderCards(filtered);
+    }
+
+    function renderCards(items) {
+      if (items.length === 0) {
+        artifactGrid.innerHTML = `<div class="empty-state">該当する資料が見つかりませんでした</div>`;
+        return;
+      }
+
+      const cardsHtml = items.map(it => {
+        const badges = [`<span class="category-tag">${categoryLabel(it.category)}</span>`];
+        if (isNew(it.updatedAt)) {
+          badges.push(`<span class="new-tag">NEW</span>`);
+        }
+
+        return `
+          <div class="artifact-card">
+            <div class="artifact-content">
+              <div class="artifact-badges">${badges.join('')}</div>
+              <div class="artifact-name">${it.displayName}</div>
+              <div class="artifact-url">${it.url}</div>
+              <div class="artifact-actions">
+                <a href="${it.url}" target="_blank">表示</a>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      artifactGrid.innerHTML = cardsHtml;
     }
 
     async function fetchNetlifySites() {
@@ -313,13 +573,13 @@
 
         artifactCount.textContent = allSites.length;
 
-        // まずサイト名で即座に表示
-        renderNetlifySites(allSites, allSites.map(() => null));
+        allItems = buildItems(allSites, allSites.map(() => null));
+        applyFiltersAndRender();
 
-        // その後、日本語タイトルを取得して更新
         const titles = await fetchTitlesWithConcurrency(allSites);
         progressText.textContent = '';
-        renderNetlifySites(allSites, titles);
+        allItems = buildItems(allSites, titles);
+        applyFiltersAndRender();
       } catch (error) {
         artifactGrid.innerHTML = `
           <div class="empty-state">
@@ -331,31 +591,8 @@
       }
     }
 
-    function renderNetlifySites(sites, titles) {
-      if (sites.length === 0) {
-        artifactGrid.innerHTML = `<div class="empty-state">プロジェクトなし</div>`;
-        return;
-      }
-
-      const cardsHtml = sites.map((site, i) => {
-        const url = site.url || site.ssl_url || `https://${site.name}.netlify.app`;
-        const displayName = titles[i] || site.name;
-
-        return `
-          <div class="artifact-card">
-            <div class="artifact-content">
-              <div class="artifact-name">${displayName}</div>
-              <div class="artifact-url">${url}</div>
-              <div class="artifact-actions">
-                <a href="${url}" target="_blank">表示</a>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      artifactGrid.innerHTML = cardsHtml;
-    }
+    searchInput.addEventListener('input', applyFiltersAndRender);
+    sortSelect.addEventListener('change', applyFiltersAndRender);
 
     if (NETLIFY_TOKEN === 'nfp_WfXPysUc9VFfbBFt2SeFMznyRtkEZMFi6ebb') {
       fetchNetlifySites();

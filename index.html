@@ -483,7 +483,10 @@
       const counts = {};
       items.forEach(it => { counts[it.category] = (counts[it.category] || 0) + 1; });
 
-      const usedRules = CATEGORY_RULES.filter(r => counts[r.key]);
+      const displayOrder = ['ai_quantum', 'zeisei', 'kinyu', 'shakai_hosho', 'bosai', 'energy_gx', 'chiiki_sangyo', 'kyoiku', 'gaikou_anpo', 'hosei', 'kotsu_infra', 'sonota'];
+      const usedRules = displayOrder
+        .map(key => CATEGORY_RULES.find(r => r.key === key))
+        .filter(r => r && counts[r.key]);
 
       const chips = [
         `<button class="category-chip ${activeCategory === 'all' ? 'active' : ''}" data-category="all">すべて (${items.length})</button>`

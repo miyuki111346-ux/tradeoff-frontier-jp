@@ -385,6 +385,7 @@
     const resultCountEl = document.getElementById('resultCount');
 
     const CATEGORY_RULES = [
+      { key: 'sonota', label: 'その他・分析レポート', keywords: ['占星術'] },
       { key: 'ai_quantum', label: 'AI・量子・先端技術', keywords: ['AI', '量子', 'QRD', 'ロボット', '半導体', '基盤モデル'] },
       { key: 'zeisei', label: '税制・財政', keywords: ['税制', '税額控除', '消費税', '所得税', '減税', '税率'] },
       { key: 'kinyu', label: '金融・資産運用', keywords: ['金融', '資産運用', '銀行', '証券', 'ガバナンス・コード'] },
@@ -395,8 +396,7 @@
       { key: 'kyoiku', label: '教育・人材', keywords: ['教育', '学校', 'GIGA', '人材'] },
       { key: 'gaikou_anpo', label: '外交・安全保障・国際', keywords: ['外為', '安全保障', '治安', '国際', 'パートナーシップ', '世界銀行', '南極条約', '中露', '関係性'] },
       { key: 'hosei', label: '法改正・規制改革', keywords: ['法律', '法案', '規制改革', '改正'] },
-      { key: 'kotsu_infra', label: '交通・インフラ', keywords: ['交通', 'インフラ', '下水道', '船舶', '宇宙'] },
-      { key: 'sonota', label: 'その他・分析レポート', keywords: [] }
+      { key: 'kotsu_infra', label: '交通・インフラ', keywords: ['交通', 'インフラ', '下水道', '船舶', '宇宙'] }
     ];
 
     function classifyTitle(title) {

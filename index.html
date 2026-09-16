@@ -573,7 +573,8 @@
 
         let allSites = await response.json();
         let page = 2;
-        while (allSites.length < 100) {
+        let lastPageSize = allSites.length;
+        while (lastPageSize === 100) {
           const nextResponse = await fetch(`https://api.netlify.com/api/v1/sites?per_page=100&page=${page}`, {
             headers: {
               'Authorization': `Bearer ${NETLIFY_TOKEN}`
@@ -583,6 +584,7 @@
           const nextSites = await nextResponse.json();
           if (nextSites.length === 0) break;
           allSites = allSites.concat(nextSites);
+          lastPageSize = nextSites.length;
           page++;
         }
 

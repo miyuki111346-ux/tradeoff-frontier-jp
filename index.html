@@ -354,8 +354,7 @@
           <input type="text" id="searchInput" class="search-input" placeholder="キーワードで検索（タイトル・URL）">
           <select id="sortSelect" class="sort-select">
             <option value="created_desc" selected>アップロード順（新しい順）</option>
-            <option value="updated_desc">更新が新しい順</option>
-            <option value="updated_asc">更新が古い順</option>
+            <option value="created_asc">アップロード順（古い順）</option>
             <option value="name_asc">タイトル順（A→Z）</option>
           </select>
         </div>
@@ -522,14 +521,9 @@
         if (sortMode === 'name_asc') {
           return a.displayName.localeCompare(b.displayName, 'ja');
         }
-        if (sortMode === 'created_desc') {
-          const aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-          const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-          return bCreated - aCreated;
-        }
-        const aTime = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
-        const bTime = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
-        return sortMode === 'updated_asc' ? aTime - bTime : bTime - aTime;
+        const aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return sortMode === 'created_asc' ? aCreated - bCreated : bCreated - aCreated;
       });
 
       renderCategoryFilters(allItems);
@@ -545,7 +539,7 @@
 
       const cardsHtml = items.map(it => {
         const badges = [`<span class="category-tag">${categoryLabel(it.category)}</span>`];
-        if (isNew(it.updatedAt)) {
+        if (isNew(it.createdAt)) {
           badges.push(`<span class="new-tag">NEW</span>`);
         }
 

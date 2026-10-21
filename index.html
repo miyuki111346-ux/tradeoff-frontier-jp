@@ -595,6 +595,8 @@
           page++;
         }
 
+        allSites = allSites.filter(site => site.name !== 'netlify-project-list-dashboard');
+
         artifactCount.textContent = allSites.length;
 
         allItems = buildItems(allSites, allSites.map(() => null));

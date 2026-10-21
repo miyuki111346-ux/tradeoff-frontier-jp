@@ -356,6 +356,7 @@
             <option value="updated_desc">更新が新しい順</option>
             <option value="updated_asc">更新が古い順</option>
             <option value="name_asc">タイトル順（A→Z）</option>
+            <option value="created_desc">アップロード順（新しい順）</option>
           </select>
         </div>
 
@@ -468,7 +469,8 @@
           url,
           displayName,
           category: classifyTitle(titles[i]),
-          updatedAt: site.updated_at || site.published_at || site.created_at || null
+          updatedAt: site.updated_at || site.published_at || site.created_at || null,
+          createdAt: site.created_at || null
         };
       });
     }
@@ -519,6 +521,11 @@
       filtered.sort((a, b) => {
         if (sortMode === 'name_asc') {
           return a.displayName.localeCompare(b.displayName, 'ja');
+        }
+        if (sortMode === 'created_desc') {
+          const aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return bCreated - aCreated;
         }
         const aTime = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
         const bTime = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;

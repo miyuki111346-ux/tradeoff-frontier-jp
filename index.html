@@ -375,7 +375,6 @@
   </div>
 
   <script>
-    const NETLIFY_TOKEN = 'nfp_L5qFKPJkz5PgCkZhKbbSrufvAV5M7SwDd21a'
     const artifactGrid = document.getElementById('artifactGrid');
     const artifactCount = document.getElementById('artifactCount');
     const progressText = document.getElementById('progressText');
@@ -562,34 +561,18 @@
 
     async function fetchNetlifySites() {
       try {
-        const response = await fetch('https://api.netlify.com/api/v1/sites?per_page=100', {
-          headers: {
-            'Authorization': `Bearer ${NETLIFY_TOKEN}`
-          }
-        });
+        const response = await fetch('/.netlify/functions/list-sites');
 
         if (!response.ok) {
           throw new Error(`API Error: ${response.status}`);
         }
 
-        let allSites = await response.json();
-        let page = 2;
-        let lastPageSize = allSites.length;
-        while (lastPageSize === 100) {
-          const nextResponse = await fetch(`https://api.netlify.com/api/v1/sites?per_page=100&page=${page}`, {
-            headers: {
-              'Authorization': `Bearer ${NETLIFY_TOKEN}`
-            }
-          });
-          if (!nextResponse.ok) break;
-          const nextSites = await nextResponse.json();
-          if (nextSites.length === 0) break;
-          allSites = allSites.concat(nextSites);
-          lastPageSize = nextSites.length;
-          page++;
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
         }
 
-        allSites = allSites.filter(site => site.name !== 'netlify-project-list-dashboard');
+        let allSites = data.sites || [];
 
         artifactCount.textContent = allSites.length;
 
@@ -604,7 +587,7 @@
         artifactGrid.innerHTML = `
           <div class="empty-state">
             <p>Netlifyプロジェクトの読み込みに失敗しました</p>
-            <p style="font-size: 0.9rem;">トークンが正しいか確認してください</p>
+            <p style="font-size: 0.9rem;">時間をおいて再度お試しください</p>
           </div>
         `;
         console.error('Error:', error);
@@ -614,15 +597,7 @@
     searchInput.addEventListener('input', applyFiltersAndRender);
     sortSelect.addEventListener('change', applyFiltersAndRender);
 
-    if (NETLIFY_TOKEN === 'nfp_L5qFKPJkz5PgCkZhKbbSrufvAV5M7SwDd21a') {
-      fetchNetlifySites();
-    } else {
-      artifactGrid.innerHTML = `
-        <div class="empty-state">
-          <p>Netlifyトークンを設定してください</p>
-        </div>
-      `;
-    }
+    fetchNetlifySites();
   </script>
 </body>
 </html>

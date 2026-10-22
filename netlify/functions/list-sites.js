@@ -1,3 +1,4 @@
+// Reads NETLIFY_API_TOKEN from the site's environment variables (never hardcoded).
 const DASHBOARD_SITE_NAME = 'netlify-project-list-dashboard';
 
 exports.handler = async function () {

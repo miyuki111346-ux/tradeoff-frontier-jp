@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>政策・戦略・分析の資料アーカイブ</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&display=swap">
   <style>
   * {
     margin: 0;
@@ -15,9 +14,9 @@
   body {
     background: #ffffff;
     color: #0a0a0a;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', 'Meiryo', 'Noto Sans JP', sans-serif;
     font-size: 16px;
-    line-height: 1.6;
+    line-height: 1.7;
   }
 
   .container {
@@ -36,7 +35,9 @@
     font-size: 3.5rem;
     font-weight: 800;
     margin-bottom: 0.25rem;
-    letter-spacing: -2px;
+    letter-spacing: 0;
+    line-height: 1.3;
+    word-break: keep-all;
     background: linear-gradient(135deg, #000000 0%, #7c3aed 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -308,6 +309,28 @@
     margin-bottom: 1rem;
   }
 
+  .stat-unit {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-left: 0.15rem;
+  }
+
+  .category-select {
+    display: none;
+  }
+
+  .artifact-card {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .artifact-open {
+    margin-top: auto;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #7c3aed;
+  }
+
   footer {
     margin-top: 4rem;
     padding-top: 2rem;
@@ -323,11 +346,44 @@
     }
 
     h1 {
-      font-size: 2.5rem;
+      font-size: 1.9rem;
+    }
+
+    header {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.25rem;
+    }
+
+    .stats {
+      margin-bottom: 1rem;
+    }
+
+    .category-filters {
+      display: none;
+    }
+
+    .category-select {
+      display: block;
+    }
+
+    .sticky-controls {
+      padding-top: 0.75rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .controls {
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
     }
 
     .artifacts-grid {
       grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .artifact-card {
+      padding: 1.25rem;
     }
 
     .controls {
@@ -340,14 +396,15 @@
 <body>
   <div class="container">
     <header>
-      <h1>政策・戦略・分析の資料アーカイブ</h1>
+      <h1>政策・<wbr>戦略・<wbr>分析の<wbr>資料アーカイブ</h1>
+      <p class="subtitle">政策・法律・経済などをテーマに作成した分析資料を掲載しています。カテゴリーやキーワードで絞り込めます。</p>
     </header>
 
     <div id="artifacts" class="tab-content active">
       <div class="stats">
         <div class="stat-card">
-          <div class="stat-label">登録済み成果物</div>
-          <div class="stat-value" id="artifactCount">0</div>
+          <div class="stat-label">掲載資料</div>
+          <div class="stat-value"><span id="artifactCount">0</span><span class="stat-unit">件</span></div>
         </div>
       </div>
 
@@ -359,6 +416,7 @@
             <option value="created_asc">アップロード順（古い順）</option>
             <option value="name_asc">タイトル順（A→Z）</option>
           </select>
+          <select id="categorySelect" class="sort-select category-select" aria-label="カテゴリーで絞り込む"></select>
         </div>
 
         <div id="categoryFilters" class="category-filters"></div>
@@ -372,7 +430,7 @@
     </div>
 
     <footer>
-      <p>政策・戦略・分析の資料アーカイブ v6.0</p>
+      <p>政策・戦略・分析の資料アーカイブ</p>
     </footer>
   </div>
 
@@ -384,19 +442,24 @@
     const sortSelect = document.getElementById('sortSelect');
     const categoryFiltersEl = document.getElementById('categoryFilters');
     const resultCountEl = document.getElementById('resultCount');
+    const categorySelectEl = document.getElementById('categorySelect');
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    }
 
     const CATEGORY_RULES = [
       { key: 'sonota', label: 'その他・分析レポート', keywords: ['占星術'] },
-      { key: 'ai_quantum', label: 'AI・量子・先端技術', keywords: ['AI', '量子', 'QRD', 'ロボット', '半導体', '基盤モデル'] },
-      { key: 'zeisei', label: '税制・財政', keywords: ['税制', '税額控除', '消費税', '所得税', '減税', '税率', '予算', '概算要求', '実行計画'] },
+      { key: 'ai_quantum', label: 'AI・量子・先端技術', keywords: ['AI', '量子', 'QRD', 'ロボット', '半導体', '基盤モデル', '科学技術・イノベーション基本計画', 'イノベーション戦略', '科学研究', 'SBIR'] },
+      { key: 'zeisei', label: '税制・財政', keywords: ['税制', '税額控除', '消費税', '所得税', '減税', '税率', '予算', '概算要求', '実行計画', '財政', '債務持続', '債務動学', '投資枠', '財源', '国庫'] },
       { key: 'kinyu', label: '金融・資産運用', keywords: ['金融', '資産運用', '銀行', '証券', 'ガバナンス・コード', 'ステーブルコイン', 'RWA', '決済'] },
-      { key: 'shakai_hosho', label: '社会保障・医療福祉', keywords: ['社会福祉', '健康保険', '社会保障', '医療', '介護', '福祉', '給付'] },
-      { key: 'bosai', label: '防災・危機管理', keywords: ['防災', '災害', '危機管理', '震災', '地震', '火山'] },
+      { key: 'shakai_hosho', label: '社会保障・医療福祉', keywords: ['社会福祉', '健康保険', '社会保障', '医療', '介護', '福祉', '給付', '孤独', '孤立', '家族を喪失', '家事'] },
+      { key: 'bosai', label: '防災・危機管理', keywords: ['防災', '災害', '危機管理', '震災', '地震', '火山', '復興'] },
       { key: 'energy_gx', label: 'エネルギー・GX', keywords: ['GX', 'エネルギー', 'ソーラー', '電気事業法'] },
-      { key: 'chiiki_sangyo', label: '地域・産業クラスター', keywords: ['地域', 'クラスター', '産業競争力', '産業技術', '成長戦略', '成長投資'] },
-      { key: 'kyoiku', label: '教育・人材', keywords: ['教育', '学校', 'GIGA', '人材'] },
-      { key: 'gaikou_anpo', label: '外交・安全保障・国際', keywords: ['外為', '安全保障', '治安', '国際', 'パートナーシップ', '世界銀行', '南極条約', '中露', '関係性', 'サイバー', '情報会議', '重要土地', '海外展開'] },
-      { key: 'hosei', label: '法改正・規制改革', keywords: ['法律', '法案', '規制改革', '改正'] },
+      { key: 'chiiki_sangyo', label: '地域・産業クラスター', keywords: ['地域', 'クラスター', '産業競争力', '産業技術', '成長戦略', '成長投資', 'スタートアップ', 'EXPO'] },
+      { key: 'kyoiku', label: '教育・人材', keywords: ['教育', '学校', 'GIGA', '人材', '登下校'] },
+      { key: 'gaikou_anpo', label: '外交・安全保障・国際', keywords: ['外為', '安全保障', '治安', '国際', 'パートナーシップ', '世界銀行', '南極条約', '中露', '関係性', 'サイバー', '情報会議', '重要土地', '海外展開', '情報戦略', 'インド太平洋', 'セキュリティ', '不法滞在', '永住', '旅券'] },
+      { key: 'hosei', label: '法改正・規制改革', keywords: ['法律', '法案', '規制改革', '改正', '法文分析'] },
       { key: 'kotsu_infra', label: '交通・インフラ', keywords: ['交通', 'インフラ', '下水道', '船舶', '宇宙', '2045年の宿題'] }
     ];
 
@@ -498,6 +561,11 @@
 
       categoryFiltersEl.innerHTML = chips.join('');
 
+      const options = [`<option value="all">すべてのカテゴリー (${items.length})</option>`]
+        .concat(usedRules.map(r => `<option value="${r.key}">${r.label} (${counts[r.key]})</option>`));
+      categorySelectEl.innerHTML = options.join('');
+      categorySelectEl.value = activeCategory;
+
       categoryFiltersEl.querySelectorAll('.category-chip').forEach(btn => {
         btn.addEventListener('click', () => {
           activeCategory = btn.dataset.category;
@@ -545,16 +613,13 @@
         }
 
         return `
-          <div class="artifact-card">
+          <a class="artifact-card" href="${escapeHtml(it.url)}" target="_blank" rel="noopener">
             <div class="artifact-content">
               <div class="artifact-badges">${badges.join('')}</div>
-              <div class="artifact-name">${it.displayName}</div>
-              <div class="artifact-url">${it.url}</div>
-              <div class="artifact-actions">
-                <a href="${it.url}" target="_blank">表示</a>
-              </div>
+              <div class="artifact-name">${escapeHtml(it.displayName)}</div>
+              <div class="artifact-open">開く →</div>
             </div>
-          </div>
+          </a>
         `;
       }).join('');
 
@@ -598,6 +663,10 @@
 
     searchInput.addEventListener('input', applyFiltersAndRender);
     sortSelect.addEventListener('change', applyFiltersAndRender);
+    categorySelectEl.addEventListener('change', () => {
+      activeCategory = categorySelectEl.value;
+      applyFiltersAndRender();
+    });
 
     fetchNetlifySites();
   </script>

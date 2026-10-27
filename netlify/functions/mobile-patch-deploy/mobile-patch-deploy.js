@@ -78,13 +78,24 @@ exports.handler = async function (event) {
     if (body.action !== 'apply') return json(400, { error: 'unknown action' });
 
     const previousDeployId = site.published_deploy ? site.published_deploy.id : null;
+    if (!previousDeployId) return json(409, { error: 'no published deploy; nothing changed' });
     const files = await (await api(token, `/sites/${site.id}/files`)).json();
     const target = files.find((f) => f.path === '/index.html');
     if (!target) return json(409, { error: 'no /index.html', paths: files.slice(0, 10).map((f) => f.path) });
 
-    const raw = await (await api(token, `/sites/${site.id}/files/index.html`, { headers: { Accept: 'application/vnd.bitballoon.v1.raw' } })).text();
+    // Read the exact published file from this deploy's own URL, and confirm it is byte-identical
+    // to the file recorded in the deploy (SHA1). Stop without changing anything if it is not.
+    const permalink = `https://${previousDeployId}--${site.name}.netlify.app/index.html`;
+    const res = await fetch(permalink, { redirect: 'follow' });
+    if (!res.ok) return json(502, { error: `could not read published file: ${res.status}` });
+    const buf = Buffer.from(await res.arrayBuffer());
+    const gotSha = crypto.createHash('sha1').update(buf).digest('hex');
+    if (gotSha !== target.sha) return json(409, { error: 'published file does not match the deployed file (sha mismatch); nothing changed', expected: target.sha, got: gotSha, bytes: buf.length });
+    const raw = buf.toString('utf8');
+    if (raw.length < 500 || !/<html[\s>]/i.test(raw)) return json(409, { error: 'file does not look like an HTML document; nothing changed', bytes: raw.length });
     const patched = applyPatch(raw);
     if (patched === raw) return json(200, { site: name, changed: false, previousDeployId });
+    if (body.dryRun) return json(200, { site: name, dryRun: true, previousDeployId, beforeBytes: raw.length, afterBytes: patched.length, sha: target.sha });
 
     const sha = crypto.createHash('sha1').update(patched, 'utf8').digest('hex');
     const map = {};

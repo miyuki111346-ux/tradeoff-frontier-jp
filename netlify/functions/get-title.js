@@ -9,6 +9,21 @@ exports.handler = async function (event) {
     };
   }
 
+  // Only fetch pages hosted on netlify.app (prevents use as a general-purpose fetcher).
+  let parsed;
+  try {
+    parsed = new URL(targetUrl);
+  } catch (e) {
+    parsed = null;
+  }
+  if (!parsed || parsed.protocol !== 'https:' || !/^[a-z0-9-]+\.netlify\.app$/.test(parsed.hostname)) {
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Only https://*.netlify.app URLs are allowed' })
+    };
+  }
+
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);

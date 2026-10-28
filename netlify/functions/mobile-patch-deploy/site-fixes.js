@@ -59,6 +59,9 @@ module.exports = {
     generic: true,
     html: '<style>@media (max-width: 640px) { .search-row { flex-wrap: wrap !important; } .search-row label { flex-basis: 100% !important; } .search-row input { flex: 1 1 auto !important; min-width: 0 !important; } }</style>' + CLIP
   },
-  'shiryo-kensho-chiseigaku-chishiki': { generic: true, html: '' },
+  'shiryo-kensho-chiseigaku-chishiki': {
+    generic: true,
+    html: '<style>@media (max-width: 640px) { table { max-width: 100% !important; } table:not(.mp-cards) { width: 100% !important; table-layout: fixed !important; } table:not(.mp-cards) th, table:not(.mp-cards) td { overflow-wrap: anywhere; word-break: break-word; } }</style>' + CLIP
+  },
   'sdsa-simulator-jp': { generic: true, html: '' }
 };

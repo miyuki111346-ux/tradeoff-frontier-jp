@@ -63,5 +63,29 @@ module.exports = {
     generic: true,
     html: '<style>@media (max-width: 640px) { table { max-width: 100% !important; } table:not(.mp-cards) { width: 100% !important; table-layout: fixed !important; } table:not(.mp-cards) th, table:not(.mp-cards) td { overflow-wrap: anywhere; word-break: break-word; } }</style>' + CLIP
   },
-  'sdsa-simulator-jp': { generic: true, html: '' }
+  'sdsa-simulator-jp': { generic: true, html: '' },
+  'kaisei-kinshoho-shikinkessaiho-jp': {
+    generic: true,
+    html: '<style>@media (max-width: 640px) { .law-cite { white-space: normal !important; overflow-wrap: anywhere; } table:not(.mp-cards) { width: 100% !important; max-width: 100% !important; table-layout: fixed !important; } table:not(.mp-cards) th, table:not(.mp-cards) td { overflow-wrap: anywhere; word-break: break-word; } }</style>' + CLIP
+  },
+  'relationship-among-chn-rus-prk-2027': {
+    generic: true,
+    html: '<style>@media (max-width: 640px) { li a, p a, td a { overflow-wrap: anywhere; word-break: break-all; } }</style>' + CLIP
+  },
+  // AI-related documents from July: a decorative element widens the page by about 7px on phones.
+  'agriculture-forestry-fisheries-food': { generic: true, html: CLIP },
+  'financial-ai-design-jp': { generic: true, html: CLIP },
+  'public-safety-crisis-management-ai-jp': { generic: true, html: CLIP },
+  'medicalcare-nursingcare-welfare-ai-jp': { generic: true, html: CLIP },
+  'ai-for-science-design-jp': { generic: true, html: CLIP },
+  'sovereign-foundation-model-design-jp': { generic: true, html: CLIP },
+  'industrial-structure-regional-ax-jp': { generic: true, html: CLIP },
+  'government-ai-public-sector-ax-jp': { generic: true, html: CLIP },
+  'human-capital-agency-design-jp': { generic: true, html: CLIP },
+  'international-cooperation-standards': { generic: true, html: CLIP },
+  'ai-governance-safety-jp': { generic: true, html: CLIP },
+  'autonomous-driving-logistics-jp': { generic: true, html: CLIP },
+  'semiconductor-calculation-jp': { generic: true, html: CLIP },
+  'physical-ai-implementation-jp': { generic: true, html: CLIP },
+  'quantum-ready-ai-infrastructure-jp': { generic: true, html: CLIP }
 };

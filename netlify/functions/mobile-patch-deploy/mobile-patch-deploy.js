@@ -2,6 +2,9 @@
 // or restores a previous deploy. Requires MAINT_SECRET. Remove this function when the work is finished.
 const crypto = require('crypto');
 const PATCH = require('./patch.js');
+const SITE_FIXES = require('./site-fixes.js');
+const FIX_START = '<!-- site-fix:start -->';
+const FIX_END = '<!-- site-fix:end -->';
 
 const API = 'https://api.netlify.com/api/v1';
 const DASHBOARD_SITE_NAME = 'netlify-project-list-dashboard';
@@ -35,18 +38,38 @@ async function findSite(token, name) {
   }
 }
 
-function applyPatch(html) {
-  const s = html.indexOf(START);
-  const e = html.indexOf(END);
-  if (s !== -1 && e !== -1 && e > s) return html.slice(0, s) + PATCH.trim() + html.slice(e + END.length);
-  const i = html.toLowerCase().lastIndexOf('</body>');
-  return i === -1 ? html + '\n' + PATCH.trim() + '\n' : html.slice(0, i) + PATCH.trim() + '\n' + html.slice(i);
+// What is added for a site: the shared patch (unless the site's fix says otherwise) and its own fix, if any.
+function additionFor(name) {
+  const fix = SITE_FIXES[name];
+  const parts = [];
+  if (!fix || fix.generic) parts.push(PATCH.trim());
+  if (fix && fix.html) parts.push(FIX_START + '\n' + fix.html + '\n' + FIX_END);
+  return parts.join('\n');
 }
+
+function removeBlock(html, start, end) {
+  const s = html.indexOf(start);
+  const e = html.indexOf(end);
+  if (s === -1 || e === -1 || e < s) return html;
+  let tail = html.slice(e + end.length);
+  if (tail.startsWith('\n')) tail = tail.slice(1);
+  return html.slice(0, s) + tail;
+}
+
+function applyPatch(html, name) {
+  const base = removeBlock(removeBlock(html, START, END), FIX_START, FIX_END);
+  const add = additionFor(name);
+  const i = base.toLowerCase().lastIndexOf('</body>');
+  return i === -1 ? base + '\n' + add + '\n' : base.slice(0, i) + add + '\n' + base.slice(i);
+}
+
+// Netlify adds its real-user-monitoring script when serving some sites. It is not part of the deployed file.
+const RUM_RE = /<script async id="netlify-rum-container"[^>]*><\/script>\s*$/;
 
 exports.handler = async function (event) {
   if (event.httpMethod === 'GET') {
     const q = event.queryStringParameters || {};
-    if (q.action === 'patch-text') return json(200, { patch: PATCH });
+    if (q.action === 'patch-text') return json(200, { patch: q.site ? additionFor(q.site) : PATCH });
     return json(405, { error: 'POST only' });
   }
   const token = process.env.NETLIFY_API_TOKEN;
@@ -88,12 +111,17 @@ exports.handler = async function (event) {
     const permalink = `https://${previousDeployId}--${site.name}.netlify.app/index.html`;
     const res = await fetch(permalink, { redirect: 'follow' });
     if (!res.ok) return json(502, { error: `could not read published file: ${res.status}` });
-    const buf = Buffer.from(await res.arrayBuffer());
-    const gotSha = crypto.createHash('sha1').update(buf).digest('hex');
+    let buf = Buffer.from(await res.arrayBuffer());
+    let gotSha = crypto.createHash('sha1').update(buf).digest('hex');
+    if (gotSha !== target.sha) {
+      const stripped = Buffer.from(buf.toString('utf8').replace(RUM_RE, ''), 'utf8');
+      const strippedSha = crypto.createHash('sha1').update(stripped).digest('hex');
+      if (strippedSha === target.sha) { buf = stripped; gotSha = strippedSha; }
+    }
     if (gotSha !== target.sha) return json(409, { error: 'published file does not match the deployed file (sha mismatch); nothing changed', expected: target.sha, got: gotSha, bytes: buf.length });
     const raw = buf.toString('utf8');
     if (raw.length < 500 || !/<html[\s>]/i.test(raw)) return json(409, { error: 'file does not look like an HTML document; nothing changed', bytes: raw.length });
-    const patched = applyPatch(raw);
+    const patched = applyPatch(raw, name);
     if (patched === raw) return json(200, { site: name, changed: false, previousDeployId });
     if (body.dryRun) return json(200, { site: name, dryRun: true, previousDeployId, beforeBytes: raw.length, afterBytes: patched.length, sha: target.sha });
 
